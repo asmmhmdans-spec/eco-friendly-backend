@@ -233,23 +233,36 @@ function parseQrProduct(rawValue) {
   const value = String(rawValue || '').trim();
   if (!value) return null;
 
-  // أولاً: ابحث برقم الباركود في قاعدة المنتجات
-  const barcodeMatch = INLINE_PRODUCTS.find(p => p.barcode && p.barcode === value);
+  // أولاً: ابحث برقم الباركود (مرن - بيتجاهل المسافات)
+  const cleanValue = value.replace(/\s/g, '');
+  const barcodeMatch = INLINE_PRODUCTS.find(p => {
+    if (!p.barcode) return false;
+    const cleanBarcode = String(p.barcode).replace(/\s/g, '');
+    return cleanBarcode === cleanValue ||
+           cleanValue.includes(cleanBarcode) ||
+           cleanBarcode.includes(cleanValue);
+  });
   if (barcodeMatch) {
     return { name: barcodeMatch.name, status: 'green' };
   }
 
+  // ثانياً: لو JSON حاجة object فيه اسم منتج
   try {
     const parsed = JSON.parse(value);
-    const name = parsed.name || parsed.product || parsed.productName || parsed.title;
-    return name ? {
-      name: String(name).trim(),
-      status: normalizeQrStatus(parsed.status || parsed.result || parsed.analysisResult)
-    } : null;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const name = parsed.name || parsed.product || parsed.productName || parsed.title;
+      if (name) {
+        return {
+          name: String(name).trim(),
+          status: normalizeQrStatus(parsed.status || parsed.result || parsed.analysisResult)
+        };
+      }
+    }
   } catch (err) {
     // Plain text or URL QR codes are handled below.
   }
 
+  // ثالثاً: لو URL
   try {
     const url = new URL(value);
     const name = url.searchParams.get('product') || url.searchParams.get('name') || url.searchParams.get('q');
@@ -258,6 +271,7 @@ function parseQrProduct(rawValue) {
       status: normalizeQrStatus(url.searchParams.get('status') || url.searchParams.get('result'))
     } : null;
   } catch (err) {
+    // رابعاً: نص عادي أو رقم باركود غير معروف - استخدمه كاسم منتج
     return {
       name: value,
       status: 'green'
@@ -378,7 +392,7 @@ const INLINE_PRODUCTS = [
   { id: 19, name: "Samsung Galaxy Buds2", price: 149, currency: "USD" },
   { id: 20, name: "Eco-friendly Water Bottle", price: 45, currency: "USD" },
   { id: 21, name: "Reusable Shopping Bag", price: 15, currency: "USD" },
-  { id: 22, name: "بيج شيبس بلخل واللمون", barcode: "6220352231196", price: 10, currency: "EGP" }
+  { id: 22, name: "بيج شيبس بلخل واللمون", barcode: "6222035231196", price: 10, currency: "EGP" }
 ];
 
 const exchangeFallback = { USD: 60, EUR: 65, GBP: 75, AED: 16, SAR: 16, JPY: 0.45, EGP: 1 };
