@@ -982,21 +982,36 @@
                     // Static hosting fallback below.
                 }
 
-                const localResponse = await fetch('data/products.json');
-                if (!localResponse.ok) throw new Error('Products file not found');
-                const products = await localResponse.json();
-                const found = products.find(p => String(p.name || '').toLowerCase().includes(query.toLowerCase()));
-                if (!found) return { error: 'Product not found' };
+                // Try multiple paths for data/products.json (works on both local and Vercel)
+                const pathsToTry = [
+                    'data/products.json',
+                    '/data/products.json',
+                    './data/products.json'
+                ];
 
-                return {
-                    product: {
-                        id: found.id,
-                        name: found.name,
-                        originalPrice: found.price,
-                        originalCurrency: found.currency,
-                        priceInEGP: convertLocalPriceToEGP(found.price, found.currency)
+                for (const dataPath of pathsToTry) {
+                    try {
+                        const localResponse = await fetch(dataPath);
+                        if (!localResponse.ok) continue;
+                        const products = await localResponse.json();
+                        const found = products.find(p => String(p.name || '').toLowerCase().includes(query.toLowerCase()));
+                        if (!found) return { error: 'Product not found' };
+
+                        return {
+                            product: {
+                                id: found.id,
+                                name: found.name,
+                                originalPrice: found.price,
+                                originalCurrency: found.currency,
+                                priceInEGP: convertLocalPriceToEGP(found.price, found.currency)
+                            }
+                        };
+                    } catch (err) {
+                        continue;
                     }
-                };
+                }
+
+                return { error: 'Product not found' };
             }
 
             // دالة المسح

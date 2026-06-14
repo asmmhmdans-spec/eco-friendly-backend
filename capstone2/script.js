@@ -345,21 +345,36 @@ async function searchProductPrice(query) {
     // Static hosting fallback below.
   }
 
-  const localResponse = await fetch('data/products.json');
-  if (!localResponse.ok) throw new Error('Products file not found');
-  const products = await localResponse.json();
-  const found = products.find(p => String(p.name || '').toLowerCase().includes(query.toLowerCase()));
-  if (!found) return { error: 'Product not found' };
+  // Try multiple paths for data/products.json (works on both local and Vercel)
+  const pathsToTry = [
+    'data/products.json',
+    '/data/products.json',
+    './data/products.json'
+  ];
 
-  return {
-    product: {
-      id: found.id,
-      name: found.name,
-      originalPrice: found.price,
-      originalCurrency: found.currency,
-      priceInEGP: convertLocalPriceToEGP(found.price, found.currency)
+  for (const dataPath of pathsToTry) {
+    try {
+      const localResponse = await fetch(dataPath);
+      if (!localResponse.ok) continue;
+      const products = await localResponse.json();
+      const found = products.find(p => String(p.name || '').toLowerCase().includes(query.toLowerCase()));
+      if (!found) return { error: 'Product not found' };
+
+      return {
+        product: {
+          id: found.id,
+          name: found.name,
+          originalPrice: found.price,
+          originalCurrency: found.currency,
+          priceInEGP: convertLocalPriceToEGP(found.price, found.currency)
+        }
+      };
+    } catch (err) {
+      continue;
     }
-  };
+  }
+
+  return { error: 'Product not found' };
 }
 
 function initFooterLinks() {
@@ -489,15 +504,16 @@ function saveProductData(event) {
         productData.priceInEGP = greenLightPrice;
         productData.originalPrice = data.product.originalPrice;
         productData.currency = data.product.originalCurrency;
-        // Set CO2 saved: 0.5 kg for each product analyzed (only if Buy Now)
         productData.co2SavedInKg = resultType === 'green' ? 0.5 : 0;
       } else {
-        // Product not found: don't save price or CO2
-        productData.priceInEGP = null;
-        productData.co2SavedInKg = 0;
+        // المنتج مش موجود في القائمة
+        // لو green light: نحفظ 0 بدل null عشان يتحسب في المجموع (مش يتجاهل)
+        productData.priceInEGP = resultType === 'green' ? 0 : 0;
+        productData.co2SavedInKg = resultType === 'green' ? 0.5 : 0;
+        payload.product.priceInEGP = 0;
       }
 
-      // NOW save history AFTER setting productData values
+      // حفظ التاريخ بعد تحديد القيم
       saveHistory();
 
       return fetch('/api/submit', {
@@ -508,8 +524,10 @@ function saveProductData(event) {
     })
     .catch(err => {
       console.error('Search error:', err);
-      // Even on error, save history with 0 price/CO2 for non-green decisions
+      // حتى لو فشل البحث، نحفظ بسعر 0 مش null
+      productData.priceInEGP = resultType === 'green' ? 0 : 0;
       productData.co2SavedInKg = resultType === 'green' ? 0.5 : 0;
+      payload.product.priceInEGP = 0;
       saveHistory();
       return fetch('/api/submit', {
         method: 'POST',
