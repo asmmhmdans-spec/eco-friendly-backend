@@ -974,36 +974,74 @@
                 return Math.round((Number(price) || 0) * rate * 100) / 100;
             }
 
+            // Inline products data - works on any hosting without needing a file fetch
+            const INLINE_PRODUCTS = [
+                { id: 1, name: "iPhone 15", price: 999, currency: "USD" },
+                { id: 2, name: "Samsung Galaxy S24", price: 899, currency: "USD" },
+                { id: 3, name: "MacBook Pro", price: 1299, currency: "USD" },
+                { id: 4, name: "iPad Air", price: 599, currency: "USD" },
+                { id: 5, name: "Sony WH-1000XM5", price: 399, currency: "USD" },
+                { id: 6, name: "Laptop Dell XPS 13", price: 1299, currency: "USD" },
+                { id: 7, name: "Smart Watch Apple Watch", price: 399, currency: "USD" },
+                { id: 8, name: "LG OLED TV", price: 1500, currency: "USD" },
+                { id: 9, name: "Google Pixel 8", price: 799, currency: "USD" },
+                { id: 10, name: "PlayStation 5", price: 499, currency: "USD" },
+                { id: 11, name: "Nintendo Switch", price: 329, currency: "USD" },
+                { id: 12, name: "Apple AirPods Pro", price: 249, currency: "USD" },
+                { id: 13, name: "Dyson V15 Vacuum", price: 699, currency: "USD" },
+                { id: 14, name: "Bose QuietComfort 45", price: 329, currency: "USD" },
+                { id: 15, name: "Samsung Galaxy Tab S9", price: 799, currency: "USD" },
+                { id: 16, name: "Sony A7 IV Camera", price: 2499, currency: "USD" },
+                { id: 17, name: "Apple Watch Series 9", price: 399, currency: "USD" },
+                { id: 18, name: "MacBook Air", price: 999, currency: "USD" },
+                { id: 19, name: "Samsung Galaxy Buds2", price: 149, currency: "USD" },
+                { id: 20, name: "Eco-friendly Water Bottle", price: 45, currency: "USD" },
+                { id: 21, name: "Reusable Shopping Bag", price: 15, currency: "USD" }
+            ];
+
             async function searchProductPrice(query) {
+                // 1. Try the API first (works on local server)
                 try {
                     const apiResponse = await fetch(`/api/search-product?q=${encodeURIComponent(query)}`);
-                    if (apiResponse.ok) return apiResponse.json();
+                    if (apiResponse.ok) {
+                        const data = await apiResponse.json();
+                        if (data && data.product) return data;
+                    }
                 } catch (err) {
-                    // Static hosting fallback below.
+                    // fall through to inline data
                 }
 
-                // Try multiple paths for data/products.json (works on both local and Vercel)
-                const pathsToTry = [
-                    'data/products.json',
-                    '/data/products.json',
-                    './data/products.json'
-                ];
+                // 2. Use inline products data (works everywhere including Vercel static)
+                const q = String(query || '').trim().toLowerCase();
+                const found = INLINE_PRODUCTS.find(p => p.name.toLowerCase().includes(q));
+                if (found) {
+                    return {
+                        product: {
+                            id: found.id,
+                            name: found.name,
+                            originalPrice: found.price,
+                            originalCurrency: found.currency,
+                            priceInEGP: convertLocalPriceToEGP(found.price, found.currency)
+                        }
+                    };
+                }
 
+                // 3. Try fetching products.json as last resort
+                const pathsToTry = ['data/products.json', '/data/products.json', './data/products.json'];
                 for (const dataPath of pathsToTry) {
                     try {
                         const localResponse = await fetch(dataPath);
                         if (!localResponse.ok) continue;
                         const products = await localResponse.json();
-                        const found = products.find(p => String(p.name || '').toLowerCase().includes(query.toLowerCase()));
-                        if (!found) return { error: 'Product not found' };
-
+                        const foundInFile = products.find(p => String(p.name || '').toLowerCase().includes(q));
+                        if (!foundInFile) return { error: 'Product not found' };
                         return {
                             product: {
-                                id: found.id,
-                                name: found.name,
-                                originalPrice: found.price,
-                                originalCurrency: found.currency,
-                                priceInEGP: convertLocalPriceToEGP(found.price, found.currency)
+                                id: foundInFile.id,
+                                name: foundInFile.name,
+                                originalPrice: foundInFile.price,
+                                originalCurrency: foundInFile.currency,
+                                priceInEGP: convertLocalPriceToEGP(foundInFile.price, foundInFile.currency)
                             }
                         };
                     } catch (err) {
