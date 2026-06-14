@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Think Dashboard - Full SVG & Gradients</title>
+
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fcfcfc;
+            --card-border: #f0f0f0;
+            --text-main: #1a1d23;
+            --text-muted: #a0a0a0;
+            --primary-green: #00b67a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            padding: 20px;
+            color: var(--text-main);
+            direction: rtl;
+            text-align: right;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: calc(100% - 40px);
+            margin: 20px;
+            padding: 12px 25px;
+            padding-bottom: -50px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            z-index: 1;
+        }
+
+        .dot {
+            color: #0bee4f;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            /* المسافة بين الروابط */
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            /* لترتيب النصوص العربية بشكل صحيح */
+        }
+
+        /* تنسيق العناصر (الرئيسية ولوحة التحكم) */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 25px;
+        }
+
+        .nav-link {
+            color: #555;
+        }
+
+        .nav-item:hover {
+            background-color: #dddada67;
+        }
+
+        .nav-logo {
+            color: #555;
+        }
+
+        /* التنسيق الأسود البيضاوي (Active) كما في صورتك */
+        .nav-item.active {
+            background-color: black;
+            color: white;
+            border-radius: 50px;
+        }
+
+
+        .nav-item.active a {
+            color: white;
+        }
+
+        .nav-item a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+
+        .logout-style {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: #ff4d4d;
+            /* لون أحمر هادي للـ Logout */
+            color: white;
+            border-radius: 50%;
+            /* شكل دائري */
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+        .logout-style:hover {
+            background-color: #cc0000;
+            transform: scale(1.1);
+        }
+
+        .logout-style svg {
+            stroke: white;
+        }
+
+
+        .nav-placeholder {
+            height: 90px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- العناوين الكبيرة --- */
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 38px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* الأيقونات المتدرجة والبيضاء */
+        .icon-sm {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .icon-sm svg {
+            stroke: white !important;
+        }
+
+        /* الأيقونة بيضاء دائمًا */
+
+        .bg-blue {
+            background: linear-gradient(135deg, #5c7cfa 0%, #3b5bdb 100%);
+        }
+
+        .bg-green {
+            background: linear-gradient(135deg, #51cf66 0%, #2b8a3e 100%);
+        }
+
+        .bg-yellow {
+            background: linear-gradient(135deg, #ffc034 0%, #f59e0b 100%);
+        }
+
+        .bg-purple {
+            background: linear-gradient(135deg, #ae3ec9 0%, #862e9c 100%);
+        }
+
+        .label {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .value {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 4px 0;
+        }
+
+        .sub-label {
+            color: #d0d0d0;
+            font-size: 10px;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card-box {
+            background: white;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 25px;
+            min-height: 300px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .header-icon {
+            width: 34px;
+            height: 34px;
+            background: #1a1d23;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Achievements */
+        .achievements-bar {
+            background: var(--primary-green);
+            border-radius: 14px;
+            padding: 18px 25px;
+            color: white;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 25px;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .ach-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .badges-wrapper {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            flex-grow: 1;
+            min-width: 220px;
+        }
+
+        .badge-item {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px 18px;
+            min-width: 140px;
+        }
+
+        .badge-item strong {
+            display: block;
+            font-size: 13px;
+        }
+
+        .badge-item span {
+            display: block;
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        .achievement-empty,
+        .achievement-progress {
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .achievement-progress {
+            padding: 10px 0;
+            flex: 1 1 180px;
+        }
+
+        /* Empty States */
+        .empty-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #dcdcdc;
+            width: 80%;
+        }
+
+        .empty-content p {
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        /* سيكشن الإنجازات - الحالة العامة (باهتة) */
+        .achievements-bar {
+            background: var(--primary-green);
+            border-radius: 14px;
+            padding: 18px 25px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            opacity: 0.5;
+            /* شفافية السيكشن كله */
+            transition: all 0.6s ease;
+        }
+
+        /* حالة الـ Badge وهو لسه مقفول */
+        .badge-item {
+            background: rgba(255, 255, 255, 0.05);
+            /* شفاف جداً */
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px 18px;
+            min-width: 140px;
+            filter: grayscale(1);
+            /* أبيض وأسود */
+            transition: all 0.6s ease;
+        }
+
+        /* الكلاس اللي هيشيل البهتان وينور الإنجاز */
+        .badge-item.active-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            filter: grayscale(0);
+            /* يرجع لألوانه */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+            /* يكبر حاجة بسيطة */
+        }
+
+        /* لما السيكشن يبدأ يتفعل */
+        .achievements-bar.section-active {
+            opacity: 1;
+        }
+
+        .dashboard-container {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            direction: rtl;
+            /* لضبط الاتجاه العربي كما في الصورة */
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .icon-black {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+        }
+
+        .titles h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .titles p {
+            margin: 0;
+            font-size: 13px;
+            color: #999;
+        }
+
+        /* زر مسح البيانات باللون الأحمر والهوفر الخفيف */
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #d63031;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+            /* يظهر فقط عند وجود بيانات */
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: rgba(214, 48, 49, 0.08);
+        }
+
+        /* شريط المنتج (نفس الصورة) */
+        .decision-row {
+            background-color: #f6fdf9;
+            /* اللون الأخضر الفاتح في الصورة */
+            border: 1px solid #e9f5ed;
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .product-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-circle {
+            color: #2ecc71;
+            border: 1.5px solid #2ecc71;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .product-name {
+            font-weight: bold;
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .decision-date {
+            font-size: 12px;
+            color: #bbb;
+        }
+
+        .decision-status {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* الحالة الفارغة */
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #eee;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes zoomIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .animate-zoom {
+            animation: zoomIn 0.6s ease forwards;
+        }
+
+        @media (max-width: 900px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .achievements-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                padding: 18px;
+            }
+
+            .badges-wrapper {
+                width: 100%;
+                min-width: 0;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .badge-item {
+                width: 100%;
+                min-width: 0;
+                box-sizing: border-box;
+            }
+
+            .achievement-empty,
+            .achievement-progress {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo-section">
+            <p class="Think">Think <span class="dot">.</span></p>
+        </div>
+
+        <button class="nav-toggle" aria-label="Toggle navigation"><span></span></button>
+
+        <ul class="nav-links">
+            <li class="nav-item active2">
+                <a href="index.html" class="nav-link active">Home</a>
+            </li>
+
+            <li class="nav-item">
+                <a href="dash-board.html" class="nav-link">Dashboard</a>
+            </li>
+
+            <li class="auth-section" id="auth-container"></li>
+        </ul>
+    </nav>
+    <div class="nav-placeholder"></div>
+
+    <div class="container">
+
+        <header class="header">
+            <h1>لوحة التحكم الشخصية</h1>
+            <p>تتبع رحلتك نحو استهلاك أكثر مسؤولية</p>
+        </header>
+
+        <!-- Product Search Section (NEW) -->
+        <div class="stat-card" style="margin-bottom: 25px; padding: 20px;">
+            <div class="card-header">
+                <div class="header-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </div>
+                <span>البحث عن سعر المنتج</span>
+            </div>
+            <div style="margin-top: 20px; display: flex; gap: 10px; align-items: flex-end;">
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #666;">اسم المنتج</label>
+                    <input type="text" id="productSearch" placeholder="مثلاً: iPhone 15"
+                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px;">
+                </div>
+                <button id="searchBtn"
+                    style="background: #00b67a; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.3s;">ابحث</button>
+            </div>
+            <div id="productResult"
+                style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px; display: none;">
+                <div id="resultContent"></div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card" style="animation-delay: 0.1s;">
+                <div class="icon-sm bg-blue">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0" />
+                    </svg>
+                </div>
+                <div class="label">إجمالي القرارات</div>
+                <div class="value">0</div>
+                <div class="sub-label">خلال 0 يوم</div>
+            </div>
+            <div class="stat-card" style="animation-delay: 0.2s;">
+                <div class="icon-sm bg-green">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                </div>
+                <div class="label">مستواك الحالي</div>
+                <div class="value">ابدأ</div>
+                <div class="sub-label">حسب قرارات Green Light</div>
+            </div>
+            <div class="stat-card" style="animation-delay: 0.3s;">
+                <div class="icon-sm bg-yellow">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M16 8h-6a2 2 0 100 4h4a2 2 0 110 4H8M12 18V6" />
+                    </svg>
+                </div>
+                <div class="label">أموال موفرة</div>
+                <div class="value">0 ج.م</div>
+                <div class="sub-label">وفرتها من الشراء</div>
+            </div>
+            <div class="stat-card" style="animation-delay: 0.4s;">
+                <div class="icon-sm bg-purple">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <circle cx="12" cy="12" r="6" />
+                        <circle cx="12" cy="12" r="2" />
+                    </svg>
+                </div>
+                <div class="label">معدل المسؤولية</div>
+                <div class="value">0%</div>
+                <div class="sub-label">قرارات واعية</div>
+            </div>
+        </div>
+
+
+        <!-- Achievements -->
+        <div class="achievements-bar" style="animation-delay: 0.7s;">
+            <div class="ach-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path
+                        d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-12 0v4h12v-4m-12 0h12" />
+                </svg>
+                إنجازاتك
+            </div>
+            <div class="badges-wrapper">
+                <div class="achievement-empty">ابدأ بأول قرار Green Light لفتح مستوى المبتدئ</div>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <!-- الهيدر الثابت -->
+            <div class="dashboard-header">
+                <div class="header-right">
+                    <div class="icon-black">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="titles">
+                        <h3>آخر القرارات</h3>
+                        <p id="sub-title">سجل نشاطك الأخير</p>
+                    </div>
+                </div>
+
+                <div class="header-left">
+                    <button id="deleteBtn" class="delete-btn" onclick="clearAllData()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg>
+                        مسح البيانات
+                    </button>
+                </div>
+            </div>
+
+            <!-- مكان ظهور المحتوى (فارغ أو منتجات) -->
+            <div id="decisionsContainer"></div>
+        </div>
+
+        <script>
+            function initNavToggle() {
+                const navToggle = document.querySelector('.nav-toggle');
+                const navLinks = document.querySelector('.nav-links');
+
+                if (!navToggle || !navLinks) return;
+
+                navToggle.addEventListener('click', () => {
+                    navLinks.classList.toggle('show');
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (!navToggle.contains(event.target) && !navLinks.contains(event.target)) {
+                        navLinks.classList.remove('show');
+                    }
+                });
+            }
+
+            function renderDashboard() {
+                const container = document.getElementById('decisionsContainer');
+                const deleteBtn = document.getElementById('deleteBtn');
+                const subTitle = document.getElementById('sub-title');
+
+                // جلب البيانات من الـ localStorage (المكان اللي حفظنا فيه المنتجات)
+                const history = JSON.parse(localStorage.getItem('decisionHistory')) || [];
+
+                // --- الجزء الأول: تحديث الإحصائيات (Stats) ---
+                const total = history.length;
+                const greenDecisions = history.filter(item => item.status === 'green');
+                // حساب مجموع أسعار كل قرارات Green Light
+                const greenPurchases = history.filter(item => item.status === 'green' && item.priceInEGP !== null && item.priceInEGP !== undefined);
+                const moneySaved = greenPurchases.reduce((sum, item) => sum + (Number(item.priceInEGP) || 0), 0);
+                const rate = total > 0 ? Math.round((greenDecisions.length / total) * 100) : 0;
+                const levelState = getLevelState(greenDecisions.length);
+                renderAchievements(greenDecisions.length);
+
+                // تحديث القيم في الـ HTML
+                if (document.querySelector('.stat-card')) {
+                    document.querySelector('.stat-card:nth-child(1) .value').innerText = total;
+                    document.querySelector('.stat-card:nth-child(2) .value').innerText = levelState.current ? levelState.current.title : "ابدأ";
+                    document.querySelector('.stat-card:nth-child(2) .sub-label').innerText = levelState.current
+                        ? (levelState.next ? `${greenDecisions.length}/${levelState.next.count} للوصول إلى ${levelState.next.title}` : "وصلت لأعلى مستوى")
+                        : "أول Green Light يفتح المبتدئ";
+                    const yellowValue = document.querySelector('.stat-card:nth-child(3) .value');
+                    const yellowLabel = document.querySelector('.stat-card:nth-child(3) .sub-label');
+
+                    // دايماً بنعرض مجموع كل قرارات Green Light
+                    if (greenPurchases.length > 0) {
+                        yellowValue.innerText = moneySaved.toLocaleString('ar-EG') + " ج.م";
+                        yellowLabel.innerText = `مجموع ${greenPurchases.length} منتج Green Light`;
+                    } else {
+                        yellowValue.innerText = "0 ج.م";
+                        yellowLabel.innerText = "وفرتها من الشراء";
+                    }
+                    document.querySelector('.stat-card:nth-child(4) .value').innerText = rate + "%";
+                }
+
+                // --- الجزء الثاني: عرض المنتجات أو الحالة الفارغة ---
+                if (total === 0) {
+                    if (deleteBtn) deleteBtn.style.display = "none";
+                    if (subTitle) subTitle.innerText = "لا يوجد نشاط حالياً";
+
+                    container.innerHTML = `
+            <div class="empty-state" style="text-align:center; padding:60px 0; opacity:0.3;">
+                <div style="font-size: 40px; margin-bottom:10px;">📦</div>
+                <p style="font-size: 16px; color: #333; margin:0;">لم تتخذ أي قرارات بعد</p>
+                <small style="color: #999;">ابدأ باستخدام أداة التحليل لتتبع قراراتك</small>
+            </div>`;
+                    return;
+                }
+
+                if (deleteBtn) deleteBtn.style.display = "flex";
+                if (subTitle) subTitle.innerText = "سجل نشاطك الأخير";
+
+                container.innerHTML = history.slice().reverse().map(item => `
+        <div class="decision-row" style="background-color: ${item.status === 'green' ? '#f6fdf9' : item.status === 'red' ? '#fff5f5' : '#fffaf0'};">
+            <div class="product-meta">
+                <div class="status-circle" style="color: ${item.status === 'green' ? '#2ecc71' : '#e74c3c'}; border-color: ${item.status === 'green' ? '#2ecc71' : '#e74c3c'};">
+                    ${item.status === 'green' ? '✓' : '✕'}
+                </div>
+                <div>
+                    <div class="product-name">${item.name}</div>
+                    <div class="decision-date">${item.date}</div>
+                </div>
+            </div>
+            <div class="decision-status">
+                ${item.status === 'green' ? 'قررت الشراء' : 'قررت التراجع'}
+            </div>
+        </div>
+    `).join('');
+
+                // تشغيل الأنيميشن
+                document.querySelectorAll('.stat-card, .card-box').forEach(el => el.classList.add('animate'));
+                const achievements = document.querySelector('.achievements-bar');
+                if (achievements) achievements.classList.add('animate-zoom');
+            }
+
+            function getDecisionLevels() {
+                return [
+                    { count: 1, title: 'المبتدئ', text: 'أول قرار Green Light' },
+                    { count: 3, title: 'الواعي', text: '3 قرارات صح' },
+                    { count: 5, title: 'مستهلك ذكي', text: '5 قرارات مسؤولة' },
+                    { count: 10, title: 'حامي البيئة', text: '10 قرارات Green Light' }
+                ];
+            }
+
+            function getLevelState(greenCount) {
+                const levels = getDecisionLevels();
+                return {
+                    current: levels.slice().reverse().find(level => greenCount >= level.count),
+                    next: levels.find(level => greenCount < level.count)
+                };
+            }
+
+            function renderAchievements(greenCount) {
+                const achievementsBar = document.querySelector('.achievements-bar');
+                const badgesWrapper = document.querySelector('.badges-wrapper');
+                if (!achievementsBar || !badgesWrapper) return;
+
+                const { current: currentLevel, next: nextLevel } = getLevelState(greenCount);
+
+                if (!currentLevel) {
+                    achievementsBar.classList.remove('section-active');
+                    badgesWrapper.innerHTML = '<div class="achievement-empty">ابدأ بأول قرار Green Light لفتح مستوى المبتدئ</div>';
+                    return;
+                }
+
+                achievementsBar.classList.add('section-active');
+                badgesWrapper.innerHTML = `
+                    <div class="badge-item active-badge">
+                        <strong>${currentLevel.title}</strong>
+                        <span>${currentLevel.text}</span>
+                    </div>
+                    <div class="achievement-progress">
+                        ${nextLevel ? `${greenCount}/${nextLevel.count} للوصول إلى ${nextLevel.title}` : 'وصلت لأعلى مستوى حاليًا'}
+                    </div>
+                `;
+            }
+
+            async function processPendingQrProduct() {
+                const params = new URLSearchParams(window.location.search);
+                const queryProduct = params.get('product') || params.get('name') || params.get('q');
+                const queryStatus = params.get('status') || params.get('result');
+                const rawPending = localStorage.getItem('pendingQrProduct');
+                if (!rawPending && !queryProduct) return;
+
+                localStorage.removeItem('pendingQrProduct');
+
+                let pending;
+                if (queryProduct) {
+                    pending = {
+                        name: queryProduct,
+                        status: queryStatus || 'green'
+                    };
+                    window.history.replaceState({}, document.title, 'dash-board.html');
+                } else {
+                    try {
+                        pending = JSON.parse(rawPending);
+                    } catch (err) {
+                        return;
+                    }
+                }
+
+                const productName = String(pending.name || '').trim();
+                if (!productName) return;
+
+                const resultType = normalizeQrDecisionStatus(pending.status);
+                const productData = {
+                    name: productName,
+                    status: resultType,
+                    source: 'qr',
+                    date: new Date().toLocaleString('ar-EG', {
+                        day: 'numeric', month: 'long', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', hour12: true
+                    }),
+                    priceInEGP: null,
+                    originalPrice: null,
+                    currency: null,
+                    co2SavedInKg: resultType === 'green' ? 0.5 : 0
+                };
+
+                const payload = {
+                    userName: localStorage.getItem('userName') || 'Anonymous',
+                    userEmail: localStorage.getItem('userEmail') || 'unknown@example.com',
+                    product: {
+                        name: productName,
+                        analysisResult: resultType,
+                        analysisDate: new Date().toISOString(),
+                        source: 'qr',
+                        priceInEGP: null,
+                        originalPrice: null,
+                        currency: null
+                    }
+                };
+
+                try {
+                    const data = await searchProductPrice(productName);
+                    if (data.product) {
+                        const priceToSave = resultType === 'green' ? data.product.priceInEGP : 0;
+                        productData.priceInEGP = priceToSave;
+                        productData.originalPrice = data.product.originalPrice;
+                        productData.currency = data.product.originalCurrency;
+                        payload.product.priceInEGP = priceToSave;
+                        payload.product.originalPrice = data.product.originalPrice;
+                        payload.product.currency = data.product.originalCurrency;
+                    } else if (resultType !== 'green') {
+                        productData.priceInEGP = 0;
+                        payload.product.priceInEGP = 0;
+                    }
+                } catch (err) {
+                    if (resultType !== 'green') {
+                        productData.priceInEGP = 0;
+                        payload.product.priceInEGP = 0;
+                    }
+                }
+
+                const history = JSON.parse(localStorage.getItem('decisionHistory')) || [];
+                history.push(productData);
+                localStorage.setItem('decisionHistory', JSON.stringify(history));
+
+                localStorage.setItem('lastProductSearch', JSON.stringify({
+                    name: productData.name,
+                    priceInEGP: resultType === 'green' ? productData.priceInEGP : 0,
+                    co2SavedInKg: productData.co2SavedInKg
+                }));
+
+                try {
+                    await fetch('/api/submit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (err) {
+                    console.error('Failed to save QR product:', err);
+                }
+            }
+
+            function normalizeQrDecisionStatus(status) {
+                const value = String(status || '').trim().toLowerCase();
+                if (['green', 'green light', 'buy', 'yes'].includes(value)) return 'green';
+                if (['orange', 'pause', 'reflect'].includes(value)) return 'orange';
+                if (['red', 'hard pass', 'no'].includes(value)) return 'red';
+                return 'green';
+            }
+
+            const exchangeFallback = { USD: 60, EUR: 65, GBP: 75, AED: 16, SAR: 16, JPY: 0.45 };
+
+            function convertLocalPriceToEGP(price, currency) {
+                const rate = exchangeFallback[String(currency || 'USD').toUpperCase()] || exchangeFallback.USD;
+                return Math.round((Number(price) || 0) * rate * 100) / 100;
+            }
+
+            async function searchProductPrice(query) {
+                try {
+                    const apiResponse = await fetch(`/api/search-product?q=${encodeURIComponent(query)}`);
+                    if (apiResponse.ok) return apiResponse.json();
+                } catch (err) {
+                    // Static hosting fallback below.
+                }
+
+                const localResponse = await fetch('data/products.json');
+                if (!localResponse.ok) throw new Error('Products file not found');
+                const products = await localResponse.json();
+                const found = products.find(p => String(p.name || '').toLowerCase().includes(query.toLowerCase()));
+                if (!found) return { error: 'Product not found' };
+
+                return {
+                    product: {
+                        id: found.id,
+                        name: found.name,
+                        originalPrice: found.price,
+                        originalCurrency: found.currency,
+                        priceInEGP: convertLocalPriceToEGP(found.price, found.currency)
+                    }
+                };
+            }
+
+            // دالة المسح
+            function clearAllData() {
+                if (confirm("هل أنت متأكد من مسح كافة البيانات؟")) {
+                    localStorage.removeItem('decisionHistory');
+                    localStorage.removeItem('lastProductSearch');
+                    renderDashboard();
+                }
+            }
+
+            // تنفيذ كل شيء عند التحميل (استخدام مستمع الأحداث أفضل من window.onload)
+            document.addEventListener('DOMContentLoaded', async () => {
+                initNavToggle();
+                await processPendingQrProduct();
+                renderDashboard();
+            });
+
+        </script>
+        <script src="dashboard-search.js"></script>
+
+</body>
+
+</html>

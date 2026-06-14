@@ -1,0 +1,532 @@
+const element = document.querySelector(".cost");
+window.addEventListener("scroll", () => {
+  const elementTop = element.getBoundingClientRect().top;
+  const screenHeight = window.innerHeight;
+
+  if (elementTop < screenHeight - 100) {
+    element.classList.add("show");
+  }
+});
+
+// تحديد أسماء الكلاسات المطلوبة
+const classNames = ['.card1', '.card2', '.card3', '.card4'];
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show2');
+      // التوقف عن مراقبة العنصر بعد ظهوره لتحسين الأداء
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 }); // يبدأ الأنيميشن عند ظهور 20% من الكارد
+
+// تفعيل المراقب لكل كلاس
+classNames.forEach((className) => {
+  const element = document.querySelector(className);
+  if (element) observer.observe(element);
+});
+
+// نحدد فقط الكلاسات التي طلبتها في مصفوفة
+const targetClasses = ['.card5', '.card6', '.card7'];
+
+// إنشاء "المراقب" (Observer)
+const Observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    // إذا ظهر الكارد في الشاشة بنسبة 20%
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show2');
+      // نتوقف عن مراقبته بمجرد ظهوره لتوفير الأداء
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+
+// تفعيل المراقب لكل كلاس في المصفوفة
+targetClasses.forEach((cls) => {
+  const element = document.querySelector(cls);
+  if (element) {
+    observer.observe(element);
+  }
+});
+
+
+// qustions section
+
+let quizAnswers = { q1: null, q2: null, q3: null };
+let lastSearchName = '';
+let lastSearchPrice = null;
+let lastSearchProduct = null;
+let qrStream = null;
+let qrScanFrame = null;
+
+function answerQuestion(questionNumber, isPositive) {
+  quizAnswers[`q${questionNumber}`] = isPositive ? 1 : 0;
+}
+
+function calculateQuizResult() {
+  const score = (quizAnswers.q1 || 0) + (quizAnswers.q2 || 0) + (quizAnswers.q3 || 0);
+  if (score >= 3) return 'green';
+  if (score === 2) return 'orange';
+  return 'red';
+}
+
+function resetQuizAnswers() {
+  quizAnswers = { q1: null, q2: null, q3: null };
+}
+
+function showPriceResult(message, success = true) {
+  const priceResult = document.getElementById('priceResult');
+  if (!priceResult) return;
+  priceResult.textContent = message;
+  priceResult.style.display = 'block';
+  priceResult.style.color = success ? '#047857' : '#b91c1c';
+  priceResult.style.borderColor = success ? '#a7f3d0' : '#fecaca';
+  priceResult.style.background = success ? '#ecfdf5' : '#fef2f2';
+}
+
+function resetPriceResult() {
+  const priceResult = document.getElementById('priceResult');
+  if (!priceResult) return;
+  priceResult.style.display = 'none';
+  priceResult.textContent = '';
+}
+
+function startQuiz() {
+  const input = document.getElementById('itemInput');
+  const val = input.value.trim();
+
+  if (val === "") {
+    input.style.borderBottomColor = "red";
+    input.placeholder = "من فضلك اكتب اسم المنتج";
+    return;
+  }
+
+  resetQuizAnswers();
+  // This section is the quiz flow, not the product price search.
+  nextStep(1);
+}
+function showResult(resultType) {
+  // إخفاء كل الخطوات الحالية
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+
+  // إظهار صفحة النتيجة بناءً على النوع (green, orange, red)
+  const resultId = 'result-' + resultType;
+  const targetResult = document.getElementById(resultId);
+
+  if (targetResult) {
+    targetResult.classList.add('active');
+  }
+}
+
+function nextStep(stepNum) {
+  // إخفاء كل الصفحات
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+
+  // إظهار الصفحة المطلوبة
+  document.getElementById('step' + stepNum).classList.add('active');
+}
+// وظيفة لحفظ العنصر النشط في ذاكرة المتصفح قبل الانتقال
+function saveActive(id) {
+  localStorage.setItem('activeNavItem', id);
+}
+
+// عند تحميل الصفحة، نتحقق من العنصر الذي يجب أن يكون أسود
+window.addEventListener('load', () => {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active2');
+  });
+});
+// وظيفة تحديث أزرار الدخول والخروج
+
+function updateAuthUI() {
+  const authContainer = document.getElementById('auth-container');
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  const userName = localStorage.getItem('userName');
+
+  if (!authContainer) return;
+
+  if (isLoggedIn === 'true') {
+    authContainer.innerHTML = `
+            <div class="auth-dropdown">
+                <button id="auth-toggle" type="button" class="auth-icon-btn" aria-label="User menu">
+                    <span class="auth-icon-avatar">${userName ? userName.charAt(0).toUpperCase() : 'U'}</span>
+                </button>
+                <div id="auth-menu" class="auth-menu hidden">
+                    <div class="auth-user-name">${userName || 'User'}</div>
+                    <button id="auth-logout" type="button" class="logout-style auth-logout-btn">Log out</button>
+                </div>
+            </div>
+        `;
+
+    const authToggle = document.getElementById('auth-toggle');
+    const authMenu = document.getElementById('auth-menu');
+    const authLogout = document.getElementById('auth-logout');
+
+    if (authToggle && authMenu) {
+      authToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        authMenu.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', () => {
+        authMenu.classList.add('hidden');
+      });
+
+      authMenu.addEventListener('click', (event) => {
+        event.stopPropagation();
+      });
+    }
+
+    if (authLogout) {
+      authLogout.addEventListener('click', logout);
+    }
+  } else {
+    authContainer.innerHTML = `<a href="form.html" class="login-style">Log in</a>`;
+  }
+}
+
+function initNavToggle() {
+  const navToggle = document.querySelector('.nav-toggle');
+  const navLinks = document.querySelector('.nav-links');
+
+  if (!navToggle || !navLinks) return;
+
+  navToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('show');
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!navToggle.contains(event.target) && !navLinks.contains(event.target)) {
+      navLinks.classList.remove('show');
+    }
+  });
+}
+
+// تنفيذ الوظيفة عند تحميل الصفحة
+window.addEventListener('DOMContentLoaded', () => {
+  updateAuthUI();
+  initNavToggle();
+  initFooterLinks();
+});
+
+function parseQrProduct(rawValue) {
+  const value = String(rawValue || '').trim();
+  if (!value) return null;
+
+  try {
+    const parsed = JSON.parse(value);
+    const name = parsed.name || parsed.product || parsed.productName || parsed.title;
+    return name ? {
+      name: String(name).trim(),
+      status: normalizeQrStatus(parsed.status || parsed.result || parsed.analysisResult)
+    } : null;
+  } catch (err) {
+    // Plain text or URL QR codes are handled below.
+  }
+
+  try {
+    const url = new URL(value);
+    const name = url.searchParams.get('product') || url.searchParams.get('name') || url.searchParams.get('q');
+    return name ? {
+      name: name.trim(),
+      status: normalizeQrStatus(url.searchParams.get('status') || url.searchParams.get('result'))
+    } : null;
+  } catch (err) {
+    return {
+      name: value,
+      status: 'green'
+    };
+  }
+}
+
+function normalizeQrStatus(status) {
+  const value = String(status || '').trim().toLowerCase();
+  if (['green', 'green light', 'buy', 'yes'].includes(value)) return 'green';
+  if (['orange', 'pause', 'reflect'].includes(value)) return 'orange';
+  if (['red', 'hard pass', 'no'].includes(value)) return 'red';
+  return 'green';
+}
+
+async function openQrScanner() {
+  const modal = document.getElementById('qrModal');
+  const video = document.getElementById('qrVideo');
+  const status = document.getElementById('qrStatus');
+
+  if (!modal || !video || !status) return;
+
+  if (!('BarcodeDetector' in window)) {
+    status.textContent = 'QR scanning is not supported in this browser. Try Chrome on your phone.';
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    return;
+  }
+
+  try {
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    status.textContent = 'Opening camera...';
+
+    qrStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } },
+      audio: false
+    });
+
+    video.srcObject = qrStream;
+    await video.play();
+
+    const detector = new BarcodeDetector({ formats: ['qr_code'] });
+    status.textContent = 'Point the camera at the product QR code.';
+
+    const scan = async () => {
+      if (!qrStream) return;
+      try {
+        const codes = await detector.detect(video);
+        if (codes.length) {
+          const product = parseQrProduct(codes[0].rawValue);
+          if (product && product.name) {
+            status.textContent = 'Product found. Opening dashboard...';
+            localStorage.setItem('pendingQrProduct', JSON.stringify({
+              name: product.name,
+              status: product.status || 'green',
+              scannedAt: new Date().toISOString()
+            }));
+            closeQrScanner();
+            window.location.href = 'dash-board.html?source=qr';
+            return;
+          }
+          status.textContent = 'QR found, but product data is not clear.';
+        }
+      } catch (err) {
+        status.textContent = 'Still scanning...';
+      }
+      qrScanFrame = requestAnimationFrame(scan);
+    };
+
+    scan();
+  } catch (err) {
+    status.textContent = 'Camera permission is required to scan QR codes.';
+  }
+}
+
+function closeQrScanner() {
+  const modal = document.getElementById('qrModal');
+  const video = document.getElementById('qrVideo');
+
+  if (qrScanFrame) {
+    cancelAnimationFrame(qrScanFrame);
+    qrScanFrame = null;
+  }
+
+  if (qrStream) {
+    qrStream.getTracks().forEach(track => track.stop());
+    qrStream = null;
+  }
+
+  if (video) video.srcObject = null;
+  if (modal) {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+const exchangeFallback = { USD: 60, EUR: 65, GBP: 75, AED: 16, SAR: 16, JPY: 0.45 };
+
+function convertLocalPriceToEGP(price, currency) {
+  const rate = exchangeFallback[String(currency || 'USD').toUpperCase()] || exchangeFallback.USD;
+  return Math.round((Number(price) || 0) * rate * 100) / 100;
+}
+
+async function searchProductPrice(query) {
+  try {
+    const apiResponse = await fetch(`/api/search-product?q=${encodeURIComponent(query)}`);
+    if (apiResponse.ok) return apiResponse.json();
+  } catch (err) {
+    // Static hosting fallback below.
+  }
+
+  const localResponse = await fetch('data/products.json');
+  if (!localResponse.ok) throw new Error('Products file not found');
+  const products = await localResponse.json();
+  const found = products.find(p => String(p.name || '').toLowerCase().includes(query.toLowerCase()));
+  if (!found) return { error: 'Product not found' };
+
+  return {
+    product: {
+      id: found.id,
+      name: found.name,
+      originalPrice: found.price,
+      originalCurrency: found.currency,
+      priceInEGP: convertLocalPriceToEGP(found.price, found.currency)
+    }
+  };
+}
+
+function initFooterLinks() {
+  const footerContent = {
+    privacy: {
+      title: 'privacy',
+      text: 'We keep the experience simple and private. Your saved decisions are used to show your dashboard stats and help you understand your buying habits.'
+    },
+    terms: {
+      title: 'terms',
+      text: 'Use Think Before You Buy as a decision helper. The recommendations are guidance, and the final purchase decision is always yours.'
+    },
+    contact: {
+      title: 'contact',
+      text: 'Need help or want to share feedback? Contact the Smart Consumption Platform team through your project team channels.'
+    }
+  };
+
+  const links = document.querySelectorAll('[data-footer-link]');
+  const infoBox = document.getElementById('footer-info');
+  const infoTitle = document.getElementById('footer-info-title');
+  const infoText = document.getElementById('footer-info-text');
+
+  if (!links.length || !infoBox || !infoTitle || !infoText) return;
+
+  links.forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      const content = footerContent[link.dataset.footerLink];
+      if (!content) return;
+
+      links.forEach(item => item.classList.remove('active-footer-link'));
+      link.classList.add('active-footer-link');
+      infoTitle.textContent = content.title;
+      infoText.textContent = content.text;
+      infoBox.classList.add('show');
+    });
+  });
+}
+
+function saveProductData(event) {
+  if (event && event.preventDefault) {
+    event.preventDefault();
+  }
+  const itemName = document.getElementById('itemInput').value.trim();
+
+  // تحديد الحالة بناءً على صفحة النتيجة الظاهرة حالياً
+  let resultType = '';
+  if (document.getElementById('result-green').classList.contains('active')) {
+    resultType = 'green';
+  } else if (document.getElementById('result-red').classList.contains('active')) {
+    resultType = 'red';
+  } else if (document.getElementById('result-orange').classList.contains('active')) {
+    resultType = 'orange';
+  }
+
+  // إذا لم يتم كتابة اسم أو اختيار نتيجة، لا تحفظ شيئاً
+  if (!itemName || !resultType) {
+    window.location.href = 'dash-board.html';
+    return;
+  }
+
+  const productData = {
+    name: itemName,
+    status: resultType,
+    date: new Date().toLocaleString('ar-EG', {
+      day: 'numeric', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    }),
+    priceInEGP: null,
+    originalPrice: null,
+    currency: null,
+    co2SavedInKg: null
+  };
+
+  // إرسال البيانات والمنتج إلى الباك إند
+  const userName = localStorage.getItem('userName') || 'Anonymous';
+  const userEmail = localStorage.getItem('userEmail') || 'unknown@example.com';
+
+  const payload = {
+    userName,
+    userEmail,
+    product: {
+      name: itemName,
+      analysisResult: resultType,
+      analysisDate: new Date().toISOString(),
+      priceInEGP: null,
+      originalPrice: null,
+      currency: null
+    }
+  };
+
+  const saveAndNavigate = () => {
+    window.location.href = 'dash-board.html';
+  };
+
+  const saveHistory = () => {
+    let history = JSON.parse(localStorage.getItem('decisionHistory')) || [];
+    history.push(productData);
+    localStorage.setItem('decisionHistory', JSON.stringify(history));
+
+    // حفظ السعر و CO2 في lastProductSearch حسب نوع القرار
+    if (resultType === 'green' && productData.priceInEGP !== null) {
+      // Buy Now: احفظ السعر الفعلي و CO2
+      localStorage.setItem('lastProductSearch', JSON.stringify({
+        name: productData.name,
+        priceInEGP: productData.priceInEGP,
+        co2SavedInKg: productData.co2SavedInKg
+      }));
+    } else {
+      // Hard Pass أو Pause Reflect: احفظ 0 للسعر و CO2
+      localStorage.setItem('lastProductSearch', JSON.stringify({
+        name: productData.name,
+        priceInEGP: 0,
+        co2SavedInKg: 0
+      }));
+    }
+  };
+
+  searchProductPrice(itemName)
+    .then(data => {
+      if (data.product) {
+        payload.product.originalPrice = data.product.originalPrice;
+        payload.product.currency = data.product.originalCurrency;
+        const greenLightPrice = resultType === 'green' ? data.product.priceInEGP : 0;
+        payload.product.priceInEGP = greenLightPrice;
+        productData.priceInEGP = greenLightPrice;
+        productData.originalPrice = data.product.originalPrice;
+        productData.currency = data.product.originalCurrency;
+        // Set CO2 saved: 0.5 kg for each product analyzed (only if Buy Now)
+        productData.co2SavedInKg = resultType === 'green' ? 0.5 : 0;
+      } else {
+        // Product not found: don't save price or CO2
+        productData.priceInEGP = null;
+        productData.co2SavedInKg = 0;
+      }
+
+      // NOW save history AFTER setting productData values
+      saveHistory();
+
+      return fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    })
+    .catch(err => {
+      console.error('Search error:', err);
+      // Even on error, save history with 0 price/CO2 for non-green decisions
+      productData.co2SavedInKg = resultType === 'green' ? 0.5 : 0;
+      saveHistory();
+      return fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    })
+    .then(res => res.json())
+    .then(data => console.log('Product saved to backend:', data))
+    .catch(err => console.error('Failed to save product:', err))
+    .finally(saveAndNavigate);
+}
+
+function logout() {
+  localStorage.removeItem('isLoggedIn');
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userEmail');
+  localStorage.removeItem('userProfile');
+  window.location.reload();
+}

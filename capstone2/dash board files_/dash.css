@@ -1,0 +1,100 @@
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #ddd;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: calc(100% - 40px);
+    margin: 20px;
+    padding: 12px 25px;
+    padding-bottom: -50px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    z-index: 1;
+}
+
+.dot {
+    color: #0bee4f;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    /* المسافة بين الروابط */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    direction: rtl;
+    /* لترتيب النصوص العربية بشكل صحيح */
+}
+
+/* تنسيق العناصر (الرئيسية ولوحة التحكم) */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 25px;
+}
+
+.nav-link {
+    color: #555;
+}
+
+.nav-item:hover {
+    background-color: #dddada67;
+}
+.nav-logo{
+    color: #555;
+}
+/* التنسيق الأسود البيضاوي (Active) كما في صورتك */
+.nav-item.active {
+    background-color: black;
+    color: white;
+    border-radius: 50px;
+}
+
+
+.nav-item.active a {
+    color: white;
+}
+
+.nav-item a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+
+.logout-style {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #ff4d4d; /* لون أحمر هادي للـ Logout */
+    color: white;
+    border-radius: 50%; /* شكل دائري */
+    transition: 0.3s;
+    text-decoration: none;
+}
+
+.logout-style:hover {
+    background-color: #cc0000;
+    transform: scale(1.1);
+}
+
+.logout-style svg {
+    stroke: white;
+}
+
