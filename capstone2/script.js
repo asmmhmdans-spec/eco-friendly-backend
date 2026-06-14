@@ -208,11 +208,36 @@ window.addEventListener('DOMContentLoaded', () => {
   updateAuthUI();
   initNavToggle();
   initFooterLinks();
+
+  // لو جه من سكان باركود/QR، اكتب اسم المنتج تلقائياً وروح لسيكشن الأسئلة
+  const rawPending = localStorage.getItem('pendingQrProduct');
+  if (rawPending) {
+    try {
+      const pending = JSON.parse(rawPending);
+      if (pending && pending.name) {
+        const itemInput = document.getElementById('itemInput');
+        if (itemInput) {
+          itemInput.value = pending.name;
+          setTimeout(() => {
+            const anc1 = document.getElementById('anc1');
+            if (anc1) anc1.scrollIntoView({ behavior: 'smooth' });
+          }, 400);
+        }
+      }
+      localStorage.removeItem('pendingQrProduct');
+    } catch (e) {}
+  }
 });
 
 function parseQrProduct(rawValue) {
   const value = String(rawValue || '').trim();
   if (!value) return null;
+
+  // أولاً: ابحث برقم الباركود في قاعدة المنتجات
+  const barcodeMatch = INLINE_PRODUCTS.find(p => p.barcode && p.barcode === value);
+  if (barcodeMatch) {
+    return { name: barcodeMatch.name, status: 'green' };
+  }
 
   try {
     const parsed = JSON.parse(value);
@@ -275,8 +300,8 @@ async function openQrScanner() {
     video.srcObject = qrStream;
     await video.play();
 
-    const detector = new BarcodeDetector({ formats: ['qr_code'] });
-    status.textContent = 'Point the camera at the product QR code.';
+    const detector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] });
+    status.textContent = 'وجّه الكاميرا على باركود المنتج.';
 
     const scan = async () => {
       if (!qrStream) return;
@@ -285,14 +310,14 @@ async function openQrScanner() {
         if (codes.length) {
           const product = parseQrProduct(codes[0].rawValue);
           if (product && product.name) {
-            status.textContent = 'Product found. Opening dashboard...';
+            status.textContent = '✅ تم المسح! جارٍ الانتقال للأسئلة...';
             localStorage.setItem('pendingQrProduct', JSON.stringify({
               name: product.name,
               status: product.status || 'green',
               scannedAt: new Date().toISOString()
             }));
             closeQrScanner();
-            window.location.href = 'dash-board.html?source=qr';
+            window.location.href = 'index.html#anc1';
             return;
           }
           status.textContent = 'QR found, but product data is not clear.';
@@ -352,10 +377,11 @@ const INLINE_PRODUCTS = [
   { id: 18, name: "MacBook Air", price: 999, currency: "USD" },
   { id: 19, name: "Samsung Galaxy Buds2", price: 149, currency: "USD" },
   { id: 20, name: "Eco-friendly Water Bottle", price: 45, currency: "USD" },
-  { id: 21, name: "Reusable Shopping Bag", price: 15, currency: "USD" }
+  { id: 21, name: "Reusable Shopping Bag", price: 15, currency: "USD" },
+  { id: 22, name: "بيج شيبس بلخل واللمون", barcode: "6220352231196", price: 10, currency: "EGP" }
 ];
 
-const exchangeFallback = { USD: 60, EUR: 65, GBP: 75, AED: 16, SAR: 16, JPY: 0.45 };
+const exchangeFallback = { USD: 60, EUR: 65, GBP: 75, AED: 16, SAR: 16, JPY: 0.45, EGP: 1 };
 
 function convertLocalPriceToEGP(price, currency) {
   const rate = exchangeFallback[String(currency || 'USD').toUpperCase()] || exchangeFallback.USD;
